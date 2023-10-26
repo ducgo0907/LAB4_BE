@@ -39,7 +39,37 @@ const detail = async (req, res) => {
 	}
 }
 
+const uploadImageProduct = async (req, res) => {
+	const image = Array.isArray(req.files.productImages) ? req.files.productImages : [req.files.productImages]; 
+	const {productId} = req.body;
+	try {
+		if (!image) return res.sendStatus(400);
+		const listImg = [];
+		const promises = image.map(async (img) => {
+			const newImage = await imageRepository.create({ caption: img.name });
+			const imageArr = img.mimetype.split("/");
+			img.mv(__dirname + '/upload/' + newImage._id + "." + imageArr[1]);
+			const updateImage = await imageRepository.updatePushToProduct({
+				id: newImage._id.toString(),
+				url: process.env.BASE_URL + '/image/' + newImage._id,
+				caption: img.name,
+				path: '/upload/' + newImage._id + "." + imageArr[1],
+				productId
+			});
+			listImg.push(updateImage);
+		});
+
+		// Wait for all promises to resolve
+		await Promise.all(promises);
+
+		return res.status(200).json({ images: "success" });
+	} catch (error) {
+		return res.status(500).json({ message: error });
+	}
+}
+
 export default {
 	create,
-	detail
+	detail,
+	uploadImageProduct
 }

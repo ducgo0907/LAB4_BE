@@ -6,6 +6,7 @@ import { __dirname } from "../server.js";
 const imageRouter = express.Router();
 
 imageRouter.post('/', imageController.create);
-imageRouter.get("/:id", imageController.detail)
+imageRouter.get("/:id", imageController.detail);
+imageRouter.post('/uploadProduct', imageController.uploadImageProduct);
 
 export default imageRouter;
