@@ -6,14 +6,9 @@ import { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import fileUpload from 'express-fileupload';
 import cors from 'cors'
+import { v2 as cloudinary } from 'cloudinary';
 
 const app = express();
-app.use(fileUpload({
-	limits: {
-		fileSize: 10000000,
-	},
-	abortOnLimit: true,
-}));
 app.use(express.json());
 
 app.use(cors({
@@ -29,6 +24,13 @@ app.get('/', (req, res) => {
 })
 
 app.use(router);
+
+cloudinary.config({
+	cloud_name: process.env.CLOUD_NAME,
+	api_key: process.env.API_KEY,
+	api_secret: process.env.API_SECRET,
+	secure: true,
+});
 
 const port = process.env.PORT || 8080;
 app.listen(port, async () => {

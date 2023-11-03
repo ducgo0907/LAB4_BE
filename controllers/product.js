@@ -23,10 +23,7 @@ const listProduct = async (req, res) => {
 	const startIndex = (page - 1) * size;
 	try {
 		const listProduct = await productRepository.listProduct(startIndex, size);
-		res.status(200).json({
-			message: "Get list post successfully",
-			data: listProduct
-		})
+		res.status(200).json(listProduct)
 	} catch (error) {
 		return res.status(500).json({ message: error.toString() });
 	}
@@ -41,9 +38,19 @@ const detail = async (req, res) => {
 		return res.status(500).json({ message: error.toString() });
 	}
 }
+const getComments = async (req, res) => {
+	const { id } = req.params;
+	try {
+		const listComment = await productRepository.getComments(id);
+		return res.status(200).json(listComment);
+	} catch (error) {
+		return res.status(500).json({ message: error.toString() });
+	}
+}
 
 export default {
 	create,
 	listProduct,
-	detail
+	detail,
+	getComments
 }

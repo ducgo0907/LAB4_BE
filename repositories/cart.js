@@ -17,14 +17,13 @@ const addCustomProduct = async ({ productId, cartId, quantity }) => {
 		if (!product) {
 			return "Product you add that is not existed";
 		}
-		if (product.stock < quantity) {
-			return `Product don't have enough ${quantity} product. Current stock now: ${product.stock}`
-		}
 		if (!cart) {
 			return "Cart is not existed";
 		}
 		let existedProduct = cart.products.find((cProduct) => cProduct._id.toString() === productId);
-
+		if (product.stock + existedProduct.quantity < quantity) {
+			return `Product don't have enough ${quantity} product. Current stock now: ${product.stock}`
+		}
 		let totalQuantity = existedProduct ? quantity - existedProduct.quantity : quantity;
 		let discountTotal = product.discountPercentage * totalQuantity * product.price / 100;
 		let totalProduct = product.price * totalQuantity;
@@ -111,7 +110,6 @@ const view = async (cartId) => {
 const remove = async (productId, cartId) => {
 	const cart = await Cart.findById(cartId);
 	const currentProduct = await Product.findById(productId);
-	console.log(cart, productId);
 	const product = cart.products.find(product => product._id.toString() === productId);
 	let totalQuantity = product.quantity;
 	let discountTotal = product.discountPercentage * totalQuantity * product.price / 100;
@@ -129,10 +127,18 @@ const remove = async (productId, cartId) => {
 }
 
 
-const all = async () => {
-	const listCart = await Cart.find();
+const all = async (userId) => {
+	console.log(userId);
+	const listCart = await Cart.find({user: userId}).lean();
+	for (const cart of listCart) {
+		for (const product of cart.products) {
+			const cProduct = await Product.findById(product._id);
+			product.thumbnail = cProduct.thumbnail;
+		}
+	}
 	return listCart;
-}
+};
+
 export default {
 	create,
 	view,

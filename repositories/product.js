@@ -14,8 +14,12 @@ const create = async ({ name, description, price, discountPercentage, stock, bra
 
 const listProduct = async (startIndex, size) => {
 	try {
-		const listProduct = await Product.find().skip(startIndex).limit(size);
-		return listProduct;
+		const listProduct = await Product.find({stock: { $gt: 0 }}).skip(startIndex).limit(size);
+		const totalProduct = await Product.countDocuments();
+		return {
+			data: listProduct,
+			totalProduct
+		};
 	} catch (error) {
 		throw new Error(error);
 	}
@@ -36,8 +40,24 @@ const detail = async (id) => {
 	return product;
 }
 
+const getComments = async (id) => {
+	try {
+		const product = await Product.findById(id)
+		.populate({
+			path: 'comments',
+			populate: {
+				path: 'user'
+			}
+		});
+		return product.comments;
+	} catch (error) {
+		throw new Error(error);
+	}
+}
+
 export default {
 	create,
 	listProduct,
-	detail
+	detail,
+	getComments
 }

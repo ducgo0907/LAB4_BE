@@ -2,9 +2,9 @@ import Image from "../models/Image.js";
 import Product from "../models/Product.js";
 import { __dirname } from "../server.js";
 
-const create = async ({ caption }) => {
+const create = async ({ caption, url, path }) => {
 	try {
-		const newImage = Image.create({ url: "", caption, path: "", createdAt: new Date() });
+		const newImage = Image.create({ url, caption, path, createdAt: new Date() });
 		return newImage;
 	} catch (error) {
 		throw new Error(error);
@@ -71,9 +71,35 @@ const updatePushToProduct = async ({ id, url, caption, path, productId }) => {
 	}
 }
 
+const createPushToProduct = async ({ url, caption, path, productId }) => {
+	try {
+		const image = await Image.create({ url, caption, path, createdAt: new Date() });
+		const updatedProduct = await Product.findByIdAndUpdate(
+			productId,
+			{
+				$push: {
+					images: {
+						id: image._id.toString(),
+						url: url,
+						caption: caption
+					}
+				}
+			},
+			{ new: true }
+		);
+		if (!updatedProduct) {
+			throw new Error("Product not found!");
+		}
+		return image;
+	} catch (error) {
+		throw new Error(error);
+	}
+}
+
 export default {
 	create,
 	update,
 	getDirFile,
-	updatePushToProduct
+	updatePushToProduct,
+	createPushToProduct
 }

@@ -43,8 +43,10 @@ const view = async (req, res) => {
 }
 
 const all = async (req, res) => {
+	const userId  = req.userID;
+	console.log(userId);
 	try {
-		const listCart = await cartRepository.all();
+		const listCart = await cartRepository.all(userId);
 		return res.status(200).json({ message: "Success", data: listCart });
 	} catch (error) {
 		return res.status(500).json(error.toString());
